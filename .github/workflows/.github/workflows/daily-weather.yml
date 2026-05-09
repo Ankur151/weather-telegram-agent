@@ -1,0 +1,28 @@
+name: Daily weather telegram
+
+on:
+  schedule:
+    - cron: "30 1 * * *"  # 07:00 IST (UTC+5:30)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Build
+        run: mvn -DskipTests package
+
+      - name: Send message
+        env:
+          WEATHER_TELEGRAM_BOT_TOKEN: ${{ secrets.WEATHER_TELEGRAM_BOT_TOKEN }}
+          WEATHER_TELEGRAM_CHAT_ID: ${{ secrets.WEATHER_TELEGRAM_CHAT_ID }}
+        run: java -jar target/weather-sms-agent.jar
